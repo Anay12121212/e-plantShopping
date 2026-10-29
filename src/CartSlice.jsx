@@ -1,51 +1,11 @@
-import { createSlice } from '@reduxjs/toolkit';
-
-const initialState = {
-  items: []
-};
-
-const cartSlice = createSlice({
-  name: 'cart',
-  initialState,
-  reducers: {
-    addToCart(state, action) {
-      const product = action.payload;
-      const existing = state.items.find((item) => item.id === product.id);
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        state.items.push({ ...product, quantity: 1 });
-      }
-    },
-    removeFromCart(state, action) {
-      state.items = state.items.filter((item) => item.id !== action.payload);
-    },
-    increaseQuantity(state, action) {
-      const item = state.items.find((product) => product.id === action.payload);
-      if (item) item.quantity += 1;
-    },
-    decreaseQuantity(state, action) {
-      const item = state.items.find((product) => product.id === action.payload);
-      if (item && item.quantity > 1) item.quantity -= 1;
-    },
-    clearCart(state) {
-      state.items = [];
-    }
-  }
-});
-
-export const {
-  addToCart,
-  removeFromCart,
-  increaseQuantity,
-  decreaseQuantity,
-  clearCart
-} = cartSlice.actions;
-
-export const selectCartItems = (state) => state.cart.items;
-export const selectCartCount = (state) =>
-  state.cart.items.reduce((total, item) => total + item.quantity, 0);
-export const selectCartTotal = (state) =>
-  state.cart.items.reduce((total, item) => total + item.price * item.quantity, 0);
-
+import{createSlice}from'@reduxjs/toolkit';
+const cartSlice=createSlice({name:'cart',initialState:{items:[]},reducers:{
+addItem(state,action){const p=action.payload;const name=typeof p==='string'?p:p.name;const found=state.items.find(i=>i.name===name);if(found)found.quantity+=1;else state.items.push(typeof p==='string'?{id:p,name:p,cost:0,image:'',quantity:1}:{...p,id:p.id||p.name,cost:Number(p.cost??p.price??0),quantity:1});},
+removeItem(state,action){const name=typeof action.payload==='string'?action.payload:action.payload.name;state.items=state.items.filter(i=>i.name!==name);},
+updateQuantity(state,action){const{name,quantity}=action.payload;const item=state.items.find(i=>i.name===name);if(!item)return;if(quantity<=0)state.items=state.items.filter(i=>i.name!==name);else item.quantity=quantity;}
+}});
+export const{addItem,removeItem,updateQuantity}=cartSlice.actions;
+export const selectCartItems=s=>s.cart.items;
+export const selectCartCount=s=>s.cart.items.reduce((n,i)=>n+i.quantity,0);
+export const selectCartTotal=s=>s.cart.items.reduce((n,i)=>n+Number(i.cost||0)*i.quantity,0);
 export default cartSlice.reducer;
